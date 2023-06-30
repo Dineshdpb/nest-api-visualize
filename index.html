@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>API Visualization</title>
+  <style>
+    .api-section {
+      margin-bottom: 24px;
+    }
+    .api-section-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    .api-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .api-card {
+      background-color: #f2f2f2;
+      padding: 16px;
+      border-radius: 4px;
+      width: 200px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .api-method {
+      font-weight: bold;
+    }
+    .api-path {
+      margin-top: 8px;
+    }
+  </style>
+  <script src="dist/bundle.js"></script>
+</head>
+<body>
+  <button id="changeDirectoryButton">Change Directory</button>
+
+  <div id="sectionsContainer"></div>
+  <script>
+const changeDirectoryButton = document.getElementById('changeDirectoryButton');
+changeDirectoryButton.addEventListener('click', () => {
+  ipcRenderer.send('changeDirectory');
+});
+
+    window.bridge.sendSettings((event, apiInformation) => {
+      const cards = generateAPICards(apiInformation);
+      renderSections(cards);
+    
+    
+    })
+    function generateAPICards(apiInformation) {
+  const sections = [];
+
+  Object.keys(apiInformation).forEach(controller => {
+    const controllerAPIs = apiInformation[controller];
+
+    const cards = controllerAPIs.map(api => {
+      return `
+        <div class="api-card">
+          <div class="api-method">${api.method}</div>
+          <div class="api-path">${api.path}</div>
+        </div>
+      `;
+    });
+
+    const section = `
+      <div class="api-section">
+        <div class="api-section-title">${controller}</div>
+        <div class="api-cards">${cards.join('')}</div>
+      </div>
+    `;
+
+    sections.push(section);
+  });
+
+  return sections;
+}
+
+function renderSections(sections) {
+  const sectionsContainer = document.getElementById('sectionsContainer');
+  sectionsContainer.innerHTML = sections.join('');
+}
+
+    
+      </script>
+</body>
+
+</html>
+
+  

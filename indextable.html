@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Visualization</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body>
+  <table id="apiTable">
+    <thead>
+      <tr>
+        <th>Controller</th>
+        <th>Method</th>
+        <th>Path</th>
+      </tr>
+    </thead>
+    <tbody id="apiTableBody"></tbody>
+  </table>
+
+  <script>
+    debugger
+          window.bridge.sendSettings((event, apiInformation) => {
+            debugger
+            const apiTable = document.getElementById('apiTable');
+  const tbody = apiTable.querySelector('tbody');
+
+  // Clear previous rows
+  tbody.innerHTML = '';
+console.log(apiInformation)
+  // Create new rows for each API
+  Object.keys(apiInformation).forEach(controller => {
+    const controllerAPIs = apiInformation[controller];
+
+    controllerAPIs.forEach(api => {
+      const row = document.createElement('tr');
+      const methodCell = document.createElement('td');
+      const controllerCell = document.createElement('td');
+      const pathCell = document.createElement('td');
+
+      controllerCell.textContent = controller;
+      methodCell.textContent = api.method;
+      pathCell.textContent = api.path;
+
+      row.appendChild(controllerCell);
+      row.appendChild(methodCell);
+      row.appendChild(pathCell);
+      tbody.appendChild(row);
+    });
+  });
+
+
+          });
+      </script>
+</body>
+
+</html>
