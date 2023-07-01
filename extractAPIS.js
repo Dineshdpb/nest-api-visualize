@@ -65,7 +65,9 @@ function extractAPIsFromController(fileCode) {
       .trim();
     const decoratorPattern = /@(\w+)(?:\(([^)]*)\))?/g;
     const decorators = [];
-// if(decoratorsBlock){}
+if(decoratorsBlock){
+  // debugger
+}
     let decoratorMatch;
     while ((decoratorMatch = decoratorPattern.exec(decoratorsBlock)) !== null) {
       const decoratorName = decoratorMatch[1];
@@ -73,9 +75,13 @@ function extractAPIsFromController(fileCode) {
         ? decoratorMatch[2].split(",").map((param) => param.trim())
         : [];
 
+      if (decoratorParams.includes('undefined')) {
+        continue; // Skip decorators with undefined values
+      }
+
       decorators.push({
         name: decoratorName,
-        params: decoratorParams,
+        params: decoratorParams && decoratorParams?.length>0 ?decoratorParams.join(","):decoratorParams,
       });
     }
 
@@ -88,6 +94,7 @@ function extractAPIsFromController(fileCode) {
 
   return apis;
 }
+
 
 
 module.exports = { extractAPIInformation };
