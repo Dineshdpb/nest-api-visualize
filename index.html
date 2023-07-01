@@ -4,6 +4,22 @@
   <meta charset="UTF-8">
   <title>API Visualization</title>
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .button-container {
+      margin-bottom: 16px;
+    }
     .api-section {
       margin-bottom: 24px;
     }
@@ -27,65 +43,104 @@
     .api-method {
       font-weight: bold;
     }
-    .api-path {
+    .api-method-title {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    .api-decorators {
+      font-size: 12px;
       margin-top: 8px;
     }
+    .api-path {
+      font-weight: bold;
+      margin-top: 8px;
+    }
+    .chip {
+      display: inline-block;
+      padding: 4px 8px;
+      background-color: #e0e0e0;
+      color: #333;
+      font-size: 12px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
   </style>
-  <script src="dist/bundle.js"></script>
 </head>
 <body>
-  <button id="changeDirectoryButton">Change Directory</button>
+  <div class="button-container">
+    <button id="changeDirectoryButton">Change Directory</button>
+  </div>
+
+  <h1 id="project-name"></h1>
+  <h3 id="nest-version"></h3>
+  <h3 id="node-version"></h3>
 
   <div id="sectionsContainer"></div>
+
   <script>
-const changeDirectoryButton = document.getElementById('changeDirectoryButton');
-changeDirectoryButton.addEventListener('click', () => {
-  ipcRenderer.send('changeDirectory');
-});
-
-    window.bridge.sendSettings((event, apiInformation) => {
-      const cards = generateAPICards(apiInformation);
-      renderSections(cards);
-    
-    
-    })
-    function generateAPICards(apiInformation) {
-  const sections = [];
-
-  Object.keys(apiInformation).forEach(controller => {
-    const controllerAPIs = apiInformation[controller];
-
-    const cards = controllerAPIs.map(api => {
-      return `
-        <div class="api-card">
-          <div class="api-method">${api.method}</div>
-          <div class="api-path">${api.path}</div>
-        </div>
-      `;
+    const changeDirectoryButton = document.getElementById('changeDirectoryButton');
+    changeDirectoryButton.addEventListener('click', () => {
+      window.bridge.changeDirectory();
     });
 
-    const section = `
-      <div class="api-section">
-        <div class="api-section-title">${controller}</div>
-        <div class="api-cards">${cards.join('')}</div>
-      </div>
-    `;
+    window.bridge.sendSettings((event, apiInformation) => {
+      const cards = generateAPICards(apiInformation?.api);
+      renderSections(cards);
 
-    sections.push(section);
-  });
+      if (apiInformation?.projectName) {
+        const projectNameElement = document.getElementById('project-name');
+        projectNameElement.textContent = `Project Name: ${apiInformation?.projectName}`;
+      }
 
-  return sections;
-}
+      if (apiInformation?.nestJsVersion) {
+        const nestVersionElement = document.getElementById('nest-version');
+        nestVersionElement.textContent = `Nest.js Version: ${apiInformation?.nestJsVersion}`;
+      }
 
-function renderSections(sections) {
-  const sectionsContainer = document.getElementById('sectionsContainer');
-  sectionsContainer.innerHTML = sections.join('');
-}
+      if (apiInformation?.nodeJsVersion) {
+        const nodeVersionElement = document.getElementById('node-version');
+        nodeVersionElement.textContent = `Node.js Version: ${apiInformation?.nodeJsVersion}`;
+      }
+    });
 
-    
-      </script>
+    function generateAPICards(apiInformation) {
+      const sections = [];
+
+      Object.keys(apiInformation).forEach(controller => {
+        const controllerAPIs = apiInformation[controller];
+
+        const cards = controllerAPIs.map(api => {
+          const decorators = api.decorators.map(decorator => {
+            debugger
+            return `<div class="chip">${decorator.name}:${decorator.param}</div>`;
+          }).join('');
+
+          return `
+            <div class="api-card">
+              <div class="api-method-title">${api.method}</div>
+              <div class="api-decorators">${decorators}</div>
+              <div class="api-path">${api.path}</div>
+            </div>
+          `;
+        });
+
+        const section = `
+          <div class="api-section">
+            <div class="api-section-title">${controller}</div>
+            <div class="api-cards">${cards.join('')}</div>
+          </div>
+        `;
+
+        sections.push(section);
+      });
+
+      return sections;
+    }
+
+    function renderSections(sections) {
+      const sectionsContainer = document.getElementById('sectionsContainer');
+      sectionsContainer.innerHTML = sections.join('');
+    }
+  </script>
 </body>
-
 </html>
-
-  

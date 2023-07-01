@@ -8,6 +8,11 @@ contextBridge.exposeInMainWorld(
         // From main to render
         sendSettings: (message) => {
             ipcRenderer.on('sendSettings', message);
+        },
+        changeDirectory:(data)=>{
+            ipcRenderer.send('changeDirectory');
         }
+        
+
     }
 );

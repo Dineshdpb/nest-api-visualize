@@ -1,11 +1,13 @@
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const path = require('path');
 const { extractAPIInformation } = require('./extractAPIS');
+const Store = require('electron-store');
 
-
+  let mainWindow
+  const store = new Store();
 function createWindow() {
   // Create the browser window
-  const mainWindow = new BrowserWindow({
+   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -18,18 +20,33 @@ function createWindow() {
   // mainWindow.webContents.openDevTools()
   
 
-  // Extract API information
-  
   // Send API information to the renderer process
   mainWindow.webContents.on('did-finish-load',async  () => {
-    let userSelectedPath=await selectNestJSProject()
-    if(userSelectedPath && userSelectedPath.status){
-      const apiInformation = extractAPIInformation('/Users/dineshprajapati/Documents/up2/mayamoneybackend');
-    mainWindow.webContents.send('sendSettings', apiInformation)
+    let folderPath=store.get("folderPath")
+    if(!folderPath){
+      doHandleFolderSelection()
     }
+    else{
+      const apiInformation = extractAPIInformation(folderPath);
+  mainWindow.webContents.send('sendSettings', apiInformation)
+
+    }
+
+    
     
     // mainWindow.webContents.send('api-information', apiInformation);
   });
+}
+ipcMain.on("changeDirectory",()=>{
+  doHandleFolderSelection()
+})
+const doHandleFolderSelection=async()=>{
+  let userSelectedPath=await selectNestJSProject()
+  store.set("folderPath", userSelectedPath?.path||null);
+  if(userSelectedPath && userSelectedPath.status){
+    const apiInformation = extractAPIInformation(userSelectedPath.path);
+  mainWindow.webContents.send('sendSettings', apiInformation)
+  }
 }
 function selectNestJSProject() {
   return new Promise((resolve, reject) => {
